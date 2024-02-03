@@ -1,59 +1,71 @@
-import './style.css';
+import { Model } from "./geometry/model";
+import { Vec3 } from "./geometry/vector";
+import { Camera } from "./renderer/camera";
+import { Renderer } from "./renderer/renderer";
+import "./style.css";
 
 const canvasId = "canvas";
-let circle = {x: 0, y: 0, radius: 300};
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <canvas height="1000" width="600" id="${canvasId}" />
-`
+let camera = new Camera({
+	position: new Vec3(0, 0, 10),
+	target: Vec3.zero(),
+	clip: {
+		near: 0.01,
+		far: 20.0,
+	},
+});
+
+let models = [Model.cube(1)];
+
+document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
+  <canvas style="background: black" height="200" width="300" id="${canvasId}" />
+`;
 
 init(canvasId);
 
 function init(canvasId: string) {
-  const context = initCanvas(canvasId);
-  initListeners();
+	const context = initCanvas(canvasId);
+	initListeners();
 
-  requestAnimationFrame(() => render(context));
- }
+	requestAnimationFrame(() => render(context));
+}
 
 function initCanvas(canvasId: string) {
-  const canvas = document.getElementById(canvasId);
+	const canvas = document.getElementById(canvasId);
 
-  if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
-    throw new ReferenceError(`Canvas with id '${canvasId}' was not found`);
-  }
+	if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
+		throw new ReferenceError(`Canvas with id '${canvasId}' was not found`);
+	}
 
-  const context = canvas.getContext("2d");
+	const context = canvas.getContext("2d");
 
-  if (!context) {
-    throw new Error("Could not create canvas context");
-  }
+	if (!context) {
+		throw new Error("Could not create canvas context");
+	}
 
-  return context;
+	return context;
 }
 
-function initListeners() {
-  document.addEventListener("mousemove", (e) => {
-    circle.x = e.x;
-    circle.y = e.y;
-  });
-
-  document.addEventListener("wheel", (e) => {
-    circle.radius = Math.max(circle.radius - e.deltaY / 20, 0);
-    console.log(e.deltaY);
-  })
-}
+function initListeners() {}
 
 function render(context: CanvasRenderingContext2D) {
-  const width = context.canvas.width;
-  const height = context.canvas.height;
+	const width = context.canvas.width;
+	const height = context.canvas.height;
 
-  context.clearRect(0, 0, width, height);
+	context.clearRect(0, 0, width, height);
 
-  context.beginPath();
-  context.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
-  context.strokeStyle = "red";
-  context.stroke();
+	const renderer = new Renderer({
+		width,
+		height,
+	});
 
-  requestAnimationFrame(() => render(context));
+	const frame = renderer.render(models, camera);
+	context.putImageData(frame, 0, 0);
+
+	const deltaRotation = 0.01;
+	for (let model of models) {
+		model.rotate(new Vec3(deltaRotation, -deltaRotation, 0));
+	}
+
+	requestAnimationFrame(() => render(context));
 }

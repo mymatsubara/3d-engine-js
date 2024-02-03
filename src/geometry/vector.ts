@@ -177,6 +177,6 @@ export class Vec3 {
 	}
 
 	static zero() {
-		return new Vec4(0, 0, 0, 0);
+		return new Vec3(0, 0, 0);
 	}
 }
