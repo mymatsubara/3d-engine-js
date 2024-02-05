@@ -1,4 +1,4 @@
-import { Model } from "./geometry/model";
+import { Mesh } from "./geometry/model";
 import { Vec3 } from "./geometry/vector";
 import { Camera } from "./renderer/camera";
 import { Renderer } from "./renderer/renderer";
@@ -15,10 +15,10 @@ let camera = new Camera({
 	},
 });
 
-let models = [Model.cube(1)];
+let models = [Mesh.cube(1)];
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-  <canvas style="background: black" height="200" width="300" id="${canvasId}" />
+  <canvas style="background: black" height="300" width="500" id="${canvasId}" />
 `;
 
 init(canvasId);

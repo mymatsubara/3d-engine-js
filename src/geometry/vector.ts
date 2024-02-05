@@ -180,3 +180,60 @@ export class Vec3 {
 		return new Vec3(0, 0, 0);
 	}
 }
+
+export class Vec2 {
+	public values: number[];
+
+	constructor(x: number, y: number) {
+		this.values = [x, y];
+	}
+
+	get x() {
+		return this.values[0];
+	}
+
+	set x(value: number) {
+		this.values[0] = value;
+	}
+
+	get y() {
+		return this.values[1];
+	}
+
+	set y(value: number) {
+		this.values[1] = value;
+	}
+
+	length() {
+		const [x, y] = this.values;
+		return Math.sqrt(x * x + y * y);
+	}
+
+	add(vec: Vec2) {
+		const v1 = this.values;
+		const v2 = vec.values;
+
+		return new Vec2(v1[0] + v2[0], v1[1] + v2[1]);
+	}
+
+	sub(vec: Vec2) {
+		const v1 = this.values;
+		const v2 = vec.values;
+
+		return new Vec2(v1[0] - v2[0], v1[1] - v2[1]);
+	}
+
+	mult(value: number) {
+		const v = this.values;
+		return new Vec2(v[0] * value, v[1] * value);
+	}
+
+	normalize() {
+		const scale = 1 / this.length();
+		return this.mult(scale);
+	}
+
+	static zero() {
+		return new Vec2(0, 0);
+	}
+}

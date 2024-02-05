@@ -1,6 +1,6 @@
-import { Model } from "../geometry/model";
-import { Vec4 } from "../geometry/vector";
-import { ImagePosition, setPixel } from "../utils/image";
+import { Mesh } from "../geometry/model";
+import { Vec2, Vec4 } from "../geometry/vector";
+import { drawLine } from "../utils/image";
 import { Camera } from "./camera";
 
 type RendererOptions = {
@@ -11,7 +11,7 @@ type RendererOptions = {
 export class Renderer {
 	constructor(private options: RendererOptions) {}
 
-	render(models: Model[], camera: Camera) {
+	render(models: Mesh[], camera: Camera) {
 		let image = new ImageData(this.options.width, this.options.height);
 
 		const viewMatrix = camera.getViewMatrix();
@@ -23,30 +23,28 @@ export class Renderer {
 				.mult(viewMatrix)
 				.mult(modelMatrix);
 
-			for (let vertex of model.vertices) {
-				const { x, y, z } = transformMatrix
-					.multVec(vertex.toVertex())
-					.toEuclidian();
+			const transformedVertices = model.vertices
+				.map((vertex) =>
+					transformMatrix.multVec(vertex.toVertex()).toEuclidian()
+				)
+				.map(
+					({ x, y }) =>
+						new Vec2(
+							(((x + 1) / 2) * this.options.width) >> 0,
+							(((y + 1) / 2) * this.options.height) >> 0
+						)
+				);
 
-				// Clipping
-				if (
-					z < -1.0 ||
-					z > 1.0 ||
-					x < -1.0 ||
-					x > 1.0 ||
-					y < -1.0 ||
-					y > 1.0
-				) {
-					continue;
-				}
+			const color = new Vec4(1, 0, 0, 1);
 
-				// transform coordinates: [-1; 1] -> [0; width]; [-1, 1] -> [0; heigth]
-				const position: ImagePosition = {
-					x: (((x + 1) / 2) * this.options.width) >> 0,
-					y: (((y + 1) / 2) * this.options.height) >> 0,
-				};
+			for (let face of model.faces) {
+				const v1 = transformedVertices[face.A];
+				const v2 = transformedVertices[face.B];
+				const v3 = transformedVertices[face.C];
 
-				image = setPixel(image, position, new Vec4(1, 0, 0, 1));
+				image = drawLine(image, v1, v2, color);
+				image = drawLine(image, v2, v3, color);
+				image = drawLine(image, v3, v1, color);
 			}
 		}
 
